@@ -1,122 +1,180 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useState } from 'react';
+import { api } from './services/api';
+// Importação dos logos oficiais
+import { FaNodeJs, FaPython, FaReact, FaGitAlt, FaDocker } from 'react-icons/fa';
+import { DiPostgresql } from 'react-icons/di';
+import { VscVscode } from 'react-icons/vsc';
+import { TbDatabaseCog } from 'react-icons/tb';
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+interface Category {
+  id: string;
+  name: string;
 }
 
-export default App
+interface Technology {
+  id: string;
+  category_id: string;
+  name: string;
+  description: string;
+}
+
+// Função para retornar o ícone correto baseado no ID da tecnologia
+const getTechIcon = (id: string) => {
+  switch (id) {
+    case 'nodejs': return <FaNodeJs />;
+    case 'python': return <FaPython />;
+    case 'react': return <FaReact />;
+    case 'git': return <FaGitAlt />;
+    case 'docker': return <FaDocker />;
+    case 'postgresql': return <DiPostgresql />;
+    case 'pgadmin': return <TbDatabaseCog />;
+    case 'vscode': return <VscVscode />;
+    default: return <TbDatabaseCog />; // Fallback
+  }
+};
+
+function App() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [technologies, setTechnologies] = useState<Technology[]>([]);
+  const [selectedTechs, setSelectedTechs] = useState<string[]>([]);
+  const [generatedScript, setGeneratedScript] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [catsRes, techsRes] = await Promise.all([
+          api.get('/categories'),
+          api.get('/technologies')
+        ]);
+        setCategories(catsRes.data);
+        setTechnologies(techsRes.data);
+      } catch (error) {
+        console.error("Erro ao carregar o catálogo:", error);
+      }
+    }
+    loadData();
+  }, []);
+
+  const toggleTechnology = (techId: string) => {
+    setSelectedTechs(prev => 
+      prev.includes(techId) 
+        ? prev.filter(id => id !== techId) 
+        : [...prev, techId]
+    );
+    setGeneratedScript(null); 
+  };
+
+  const handleGenerateScript = async () => {
+    if (selectedTechs.length === 0) return;
+    
+    setIsGenerating(true);
+    try {
+      const response = await api.post('/scripts/generate', {
+        technologyIds: selectedTechs
+      });
+      setGeneratedScript(response.data.content);
+    } catch (error) {
+      console.error("Erro ao gerar o script:", error);
+      alert("Ocorreu um erro ao gerar o script.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCopy = () => {
+    if (generatedScript) {
+      navigator.clipboard.writeText(generatedScript);
+      alert("Script copiado para a área de transferência!");
+    }
+  };
+
+  const handleDownload = () => {
+    if (generatedScript) {
+      const blob = new Blob([generatedScript], { type: 'text/x-sh' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'setup.sh';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  return (
+    <div className="app-container">
+      <header className="app-header">
+        <h1 className="app-title">DevSetup</h1>
+        <p className="app-subtitle">
+          Selecione as tecnologias e gere seu ambiente de desenvolvimento.
+        </p>
+      </header>
+      
+      <main className="glass-panel">
+        {categories.length === 0 ? (
+          <p className="text-center app-subtitle">Carregando catálogo...</p>
+        ) : (
+          <>
+            <div className="catalog-section">
+              {categories.map(category => {
+                const categoryTechs = technologies.filter(t => t.category_id === category.id);
+                if (categoryTechs.length === 0) return null;
+
+                return (
+                  <div key={category.id}>
+                    <h2 className="category-title">{category.name}</h2>
+                    <div className="tech-grid">
+                      {categoryTechs.map(tech => (
+                        <div 
+                          key={tech.id} 
+                          className={`tech-card ${selectedTechs.includes(tech.id) ? 'selected' : ''}`}
+                          onClick={() => toggleTechnology(tech.id)}
+                        >
+                          {/* Renderização do ícone ao lado do título */}
+                          <div className="tech-header">
+                            <span className="tech-icon">{getTechIcon(tech.id)}</span>
+                            <span className="tech-name">{tech.name}</span>
+                          </div>
+                          <span className="tech-desc">{tech.description}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="action-section">
+              <button 
+                className="btn-primary"
+                onClick={handleGenerateScript}
+                disabled={selectedTechs.length === 0 || isGenerating}
+              >
+                {isGenerating ? 'Gerando...' : 'Gerar Script (setup.sh)'}
+              </button>
+
+              {generatedScript && (
+                <div className="script-preview-container">
+                  <div className="script-header">
+                    <span style={{ fontWeight: 600 }}>setup.sh</span>
+                    <div className="script-actions">
+                      <button className="btn-secondary" onClick={handleCopy}>Copiar</button>
+                      <button className="btn-secondary" onClick={handleDownload}>Baixar</button>
+                    </div>
+                  </div>
+                  <pre className="script-content">
+                    <code>{generatedScript}</code>
+                  </pre>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </main>
+    </div>
+  );
+}
+
+export default App;
