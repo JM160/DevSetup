@@ -4,7 +4,6 @@ import { scriptService } from "../services/scriptService";
 export const scriptController = {
     async generate(req: Request, res: Response): Promise<void> {
         try {
-            console.log("Body recebido do REST Client:", req.body);
             const {technologyIds} = req.body;
 
             if(!technologyIds || !Array.isArray(technologyIds) || technologyIds.length === 0) {

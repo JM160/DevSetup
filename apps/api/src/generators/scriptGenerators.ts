@@ -7,7 +7,7 @@ export const scriptGenerator = {
         script += `echo "Starting DevSetup..."\n\n`;
 
         for(const tech of technologies) {
-            script += `#Instalação: ${tech.name}`;
+            script += `#Instalação: ${tech.name}\n`;
             script += `echo "Configurando ${tech.name}..."\n`;
             script += `${tech.installation_script}\n\n`;
         }
