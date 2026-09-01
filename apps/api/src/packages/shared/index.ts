@@ -15,3 +15,12 @@ export interface Technology {
     verification_command: string | null;
     created_at?: Date;
 }
+
+export interface GenerateScriptPayLoad {
+    technologyIds: string[];
+}
+
+export interface GenerateScriptResponse {
+    filename: string;
+    content: string;
+}
