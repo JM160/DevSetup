@@ -5,6 +5,8 @@ import { FaNodeJs, FaPython, FaReact, FaGitAlt, FaDocker } from 'react-icons/fa'
 import { DiPostgresql } from 'react-icons/di';
 import { VscVscode } from 'react-icons/vsc';
 import { TbDatabaseCog } from 'react-icons/tb';
+import { SiTypescript, SiCplusplus, SiObsidian, SiIntellijidea, SiPycharm } from 'react-icons/si';
+import { FaJava } from 'react-icons/fa';
 
 interface Category {
   id: string;
@@ -29,6 +31,12 @@ const getTechIcon = (id: string) => {
     case 'postgresql': return <DiPostgresql />;
     case 'pgadmin': return <TbDatabaseCog />;
     case 'vscode': return <VscVscode />;
+    case 'typescript': return <SiTypescript />;
+    case 'cpp': return <SiCplusplus />;
+    case 'java': return <FaJava />;
+    case 'obsidian': return <SiObsidian />;
+    case 'intellij': return <SiIntellijidea />;
+    case 'pycharm': return <SiPycharm />;
     default: return <TbDatabaseCog />; // Fallback
   }
 };
