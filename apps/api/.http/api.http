@@ -1,0 +1,24 @@
+### Buscar Categorias
+GET http://localhost:3333/api/categories
+
+### Buscar Todas as Tecnologias
+GET http://localhost:3333/api/technologies
+
+### Buscar Tecnologia Específica
+GET http://localhost:3333/api/technologies/nodejs
+
+### Testar Tecnologia Inexistente (Deve retornar 404)
+GET http://localhost:3333/api/technologies/tecnologia-fantasma
+
+### Gerar Script de Setup
+POST http://localhost:3333/api/scripts/generate
+Content-Type: application/json
+
+{
+  "technologyIds": [
+    "nodejs",
+    "git",
+    "vscode",
+    "vscode"
+  ]
+}
