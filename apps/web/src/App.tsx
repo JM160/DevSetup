@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { api } from './services/api';
 // Importação dos logos oficiais
-import { FaNodeJs, FaPython, FaReact, FaGitAlt, FaDocker } from 'react-icons/fa';
+import { FaNodeJs, FaPython, FaReact, FaGitAlt, FaDocker, FaJava, FaVuejs, FaAngular, FaLaravel } from 'react-icons/fa';
+import { SiTypescript, SiCplusplus, SiObsidian, SiIntellijidea, SiPycharm, SiKotlin, SiSpringboot, SiNextdotjs, SiNestjs, SiDjango, SiSharp, SiEclipseide, SiNotion } from 'react-icons/si';
 import { DiPostgresql } from 'react-icons/di';
-import { VscVscode } from 'react-icons/vsc';
+import { VscVscode, VscTerminal } from 'react-icons/vsc';
 import { TbDatabaseCog } from 'react-icons/tb';
-import { SiTypescript, SiCplusplus, SiObsidian, SiIntellijidea, SiPycharm } from 'react-icons/si';
-import { FaJava } from 'react-icons/fa';
+import { BsStars } from 'react-icons/bs';
 
 interface Category {
   id: string;
@@ -23,6 +23,7 @@ interface Technology {
 // Função para retornar o ícone correto baseado no ID da tecnologia
 const getTechIcon = (id: string) => {
   switch (id) {
+    // Linguagens e Ferramentas Antigas
     case 'nodejs': return <FaNodeJs />;
     case 'python': return <FaPython />;
     case 'react': return <FaReact />;
@@ -37,7 +38,23 @@ const getTechIcon = (id: string) => {
     case 'obsidian': return <SiObsidian />;
     case 'intellij': return <SiIntellijidea />;
     case 'pycharm': return <SiPycharm />;
-    default: return <TbDatabaseCog />; // Fallback
+
+    // Novas Tecnologias
+    case 'kotlin': return <SiKotlin />;
+    case 'csharp': return <SiSharp />;
+    case 'springboot': return <SiSpringboot />;
+    case 'vuejs': return <FaVuejs />;
+    case 'nextjs': return <SiNextdotjs />;
+    case 'nestjs': return <SiNestjs />;
+    case 'angular': return <FaAngular />;
+    case 'django': return <SiDjango />;
+    case 'laravel': return <FaLaravel />;
+    case 'eclipse': return <SiEclipseide />;
+    case 'cursor': return <BsStars />;
+    case 'antigravity': return <VscTerminal />;
+    case 'notion': return <SiNotion />;
+
+    default: return <TbDatabaseCog />;
   }
 };
 
@@ -65,17 +82,17 @@ function App() {
   }, []);
 
   const toggleTechnology = (techId: string) => {
-    setSelectedTechs(prev => 
-      prev.includes(techId) 
-        ? prev.filter(id => id !== techId) 
+    setSelectedTechs(prev =>
+      prev.includes(techId)
+        ? prev.filter(id => id !== techId)
         : [...prev, techId]
     );
-    setGeneratedScript(null); 
+    setGeneratedScript(null);
   };
 
   const handleGenerateScript = async () => {
     if (selectedTechs.length === 0) return;
-    
+
     setIsGenerating(true);
     try {
       const response = await api.post('/scripts/generate', {
@@ -119,7 +136,7 @@ function App() {
           Selecione as tecnologias e gere seu ambiente de desenvolvimento.
         </p>
       </header>
-      
+
       <main className="glass-panel">
         {categories.length === 0 ? (
           <p className="text-center app-subtitle">Carregando catálogo...</p>
@@ -135,8 +152,8 @@ function App() {
                     <h2 className="category-title">{category.name}</h2>
                     <div className="tech-grid">
                       {categoryTechs.map(tech => (
-                        <div 
-                          key={tech.id} 
+                        <div
+                          key={tech.id}
                           className={`tech-card ${selectedTechs.includes(tech.id) ? 'selected' : ''}`}
                           onClick={() => toggleTechnology(tech.id)}
                         >
@@ -155,7 +172,7 @@ function App() {
             </div>
 
             <div className="action-section">
-              <button 
+              <button
                 className="btn-primary"
                 onClick={handleGenerateScript}
                 disabled={selectedTechs.length === 0 || isGenerating}
