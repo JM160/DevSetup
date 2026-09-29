@@ -37,3 +37,25 @@ INSERT INTO technologies (id, category_id, name, description, official_url, inst
 -- IDEs
 ('intellij', 'ides', 'IntelliJ IDEA Community', 'IDE da JetBrains focada em ecossistema Java (via Snap)', 'https://www.jetbrains.com/idea/', 'sudo snap install intellij-idea-community --classic', 'snap list | grep intellij'),
 ('pycharm', 'ides', 'PyCharm Community', 'IDE da JetBrains focada em Python (via Snap)', 'https://www.jetbrains.com/pycharm/', 'sudo snap install pycharm-community --classic', 'snap list | grep pycharm');
+
+-- Inserindo as novas tecnologias (Linguagens, Frameworks, IDEs e Produtividade)
+INSERT INTO technologies (id, category_id, name, description, official_url, installation_script, verification_command) VALUES
+
+-- Linguagens
+('kotlin', 'languages', 'Kotlin', 'Linguagem moderna e concisa da JetBrains (via Snap)', 'https://kotlinlang.org/', 'sudo snap install kotlin --classic', 'kotlin -version'),
+('csharp', 'languages', 'C# (.NET 8)', 'SDK do .NET para desenvolvimento em C# no Linux', 'https://learn.microsoft.com/pt-br/dotnet/csharp/', 'sudo apt-get update && sudo apt-get install -y dotnet-sdk-8.0', 'dotnet --version'),
+
+-- Frameworks Web e Backend
+('springboot', 'frameworks', 'Spring Boot CLI', 'Ferramenta de linha de comando para Spring Boot (via SDKMAN)', 'https://spring.io/projects/spring-boot', 'curl -s "https://get.sdkman.io" | bash && bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install springboot"', 'spring --version'),
+('vuejs', 'frameworks', 'Vue.js CLI', 'Interface de linha de comando oficial para Vue.js', 'https://vuejs.org/', 'npm install -g @vue/cli', 'vue --version'),
+('nextjs', 'frameworks', 'Next.js (create-next-app)', 'CLI para inicializar projetos React com Next.js', 'https://nextjs.org/', 'npm install -g create-next-app', 'create-next-app --version'),
+('nestjs', 'frameworks', 'NestJS CLI', 'Framework Node.js progressivo para backend', 'https://nestjs.com/', 'npm install -g @nestjs/cli', 'nest --version'),
+('angular', 'frameworks', 'Angular CLI', 'Ferramenta de linha de comando do ecossistema Angular', 'https://angular.io/', 'npm install -g @angular/cli', 'ng version'),
+('django', 'frameworks', 'Django', 'Framework web de alto nível para Python', 'https://www.djangoproject.com/', 'sudo apt-get install -y python3-pip && pip3 install django', 'django-admin --version'),
+('laravel', 'frameworks', 'Laravel Installer', 'Instalador global do framework PHP Laravel', 'https://laravel.com/', 'sudo apt-get install -y php-cli composer && composer global require laravel/installer', 'laravel --version'),
+
+-- IDEs, CLIs e Produtividade
+('eclipse', 'ides', 'Eclipse IDE', 'IDE clássica voltada para desenvolvimento Java (via Snap)', 'https://www.eclipse.org/', 'sudo snap install eclipse --classic', 'snap list | grep eclipse'),
+('cursor', 'ides', 'Cursor', 'O editor de código potencializado por IA (via AppImage)', 'https://cursor.sh/', 'curl -fsSL https://downloader.cursor.sh/linux/appImage/x64 -o ~/cursor.AppImage && chmod +x ~/cursor.AppImage', 'ls ~/cursor.AppImage'),
+('antigravity', 'tools', 'Antigravity CLI', 'Ferramenta de linha de comando para automação', 'https://github.com/', 'npm install -g antigravity-cli', 'antigravity --version'),
+('notion', 'productivity', 'Notion', 'Espaço de trabalho para notas e tarefas (via Snap)', 'https://www.notion.so/', 'sudo snap install notion-snap', 'snap list | grep notion');
