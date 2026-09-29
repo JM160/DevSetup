@@ -1,83 +1,139 @@
-# DevSetup Monorepo
+# DevSetup
 
-Este é um projeto full-stack estruturado como um **monorepo** utilizando npm workspaces. Ele contém uma API backend construída em Node.js/Express, uma aplicação frontend em React/Vite e um espaço para pacotes compartilhados, garantindo organização e reaproveitamento de código.
+O DevSetup é um MVP para Linux que permite escolher tecnologias em uma interface web e gerar um script Bash de configuração. O usuário revisa o script e pode copiá-lo ou baixá-lo como `setup.sh` para executá-lo manualmente.
 
-## 🚀 Escopo e Estrutura do Projeto
+O foco atual é Ubuntu/Debian. O navegador não executa comandos na máquina do usuário, e o DevSetup ainda não é um gerenciador completo de ambientes.
 
-O repositório está organizado nas seguintes pastas principais:
+## Escopo atual
 
-- **`apps/api/`**: Backend da aplicação. Construído com **Express** e **TypeScript**, integrado a um banco de dados **PostgreSQL**. O ambiente de desenvolvimento utiliza o `tsx` para reload rápido.
-- **`apps/web/`**: Aplicação frontend moderna e rápida, desenvolvida utilizando **React**, **Vite** e **TypeScript**. Inclui ferramentas como Axios para chamadas HTTP e bibliotecas de ícones (`lucide-react`, `react-icons`). Possui linter próprio configurado (`oxlint`).
-- **`packages/shared/`**: Espaço reservado para lógicas, utilitários, tipagens e esquemas que são compartilhados entre os diferentes projetos do monorepo (como entre o Frontend e o Backend).
-- **`database/`**: Contém a estrutura do banco de dados, incluindo diretórios para gerenciar as `migrations` (alterações no banco) e `seeds` (dados iniciais populados).
+- Catálogo de tecnologias organizado por categoria e carregado pela API.
+- Seleção de tecnologias, geração do script, preview, cópia e download.
+- Script Bash com `set -e`; quando necessário, o gerador inclui a instalação de `snapd` para tecnologias distribuídas via Snap.
+- API REST com endpoints de categorias, tecnologias e geração de scripts.
+- PostgreSQL com migrations SQL e catálogo inicial em seed.
+- Docker Compose para executar o PostgreSQL; API e aplicação web continuam rodando localmente.
+- Teste unitário do gerador configurado com Vitest.
 
-## 📋 Pré-requisitos
+O catálogo inclui linguagens e runtimes, frameworks, ferramentas, IDEs e aplicativos de produtividade. Entre os itens estão Node.js, Python, TypeScript, Java, C/C++, React, Vue, Angular, Git, Docker, PostgreSQL, VS Code, IDEs JetBrains, Obsidian e Notion.
 
-Para rodar este projeto, você precisará ter instalado em sua máquina:
-- **[Node.js](https://nodejs.org/)** (v18+ recomendado)
-- **[PostgreSQL](https://www.postgresql.org/)** (Rodando localmente ou via Docker)
+Revise o conteúdo de `setup.sh` antes de executá-lo. Os comandos vêm do catálogo, mas podem usar `sudo`, instalar pacotes e configurar repositórios externos.
 
-## 🛠️ Instalação e Configuração
+### Limites atuais
 
-1. **Clone o repositório:**
-   ```bash
-   git clone https://github.com/JM160/DevSetup.git
-   cd DevSetup
-   ```
+- O catálogo e os comandos de instalação são voltados a Ubuntu/Debian; Windows, macOS e outras distribuições não são suportados.
+- A interface ainda não oferece busca, filtros ou uma lista separada de tecnologias selecionadas.
+- O Compose sobe apenas o banco de dados, não a API nem a aplicação web.
+- Os testes automatizados existentes cobrem o gerador de scripts; endpoints da API e interface ainda não têm testes automatizados.
+- Não há pipeline CI/CD configurado.
+- Autenticação, CLI, execução remota, instalação pelo navegador e gerenciamento de ambientes estão fora do escopo atual.
 
-2. **Instale as dependências de todos os projetos:**
-   Como este é um monorepo, executar o comando abaixo na raiz instalará as bibliotecas tanto da `api` quanto do `web`.
-   ```bash
-   npm install
-   ```
+## Estrutura
 
-3. **Configure as Variáveis de Ambiente:**
-   Certifique-se de configurar as credenciais do banco de dados no arquivo `.env` localizado na **raiz** do projeto:
-   ```env
-   DATABASE_URL=postgresql://postgres:SuaSenha@localhost:5432/devsetup
-   ```
-   *(Substitua `SuaSenha` pela sua senha real do PostgreSQL)*
+- `apps/api/`: API em Node.js, Express e TypeScript, organizada em controllers, services, repositories e gerador de scripts; PostgreSQL via `pg`.
+- `apps/web/`: interface em React, TypeScript e Vite.
+- `packages/shared/`: pacote para tipos compartilhados.
+- `database/migrations/` e `database/seeds/`: schema e dados iniciais em SQL.
+- `docker-compose.yml`: serviço PostgreSQL 16 e inicialização do schema/catálogo.
+- `docs/`: documentação de escopo, arquitetura, banco, segurança e decisões.
 
-## 🖥️ Modo de Uso (Desenvolvimento)
+## Requisitos
 
-Atualmente, os projetos devem ser iniciados individualmente. Abra dois terminais:
+- Node.js compatível com Vite 8 e npm.
+- Docker com o plugin `docker compose`, ou PostgreSQL instalado localmente.
 
-**1. Iniciando o Backend (API):**
+## Configuração local
+
+Clone o repositório e instale as dependências na raiz:
+
 ```bash
-cd apps/api
+git clone https://github.com/JM160/DevSetup.git
+cd DevSetup
+npm install
+```
+
+Crie um arquivo `.env` na raiz com uma senha local. O `.env` é ignorado pelo Git.
+
+```env
+DB_PASSWORD=devsetup_local
+DATABASE_URL=postgresql://postgres:devsetup_local@localhost:5432/devsetup
+```
+
+Suba o banco de dados:
+
+```bash
+docker compose up -d db
+```
+
+No primeiro start, o PostgreSQL cria o schema e popula o catálogo a partir dos arquivos SQL montados em `/docker-entrypoint-initdb.d`. Esses scripts de inicialização só são executados quando o volume `devsetup_data` é criado pela primeira vez.
+
+Para usar uma instância PostgreSQL local em vez do Compose, crie o banco `devsetup` e aplique os arquivos SQL:
+
+```bash
+createdb devsetup
+psql "$DATABASE_URL" -f database/migrations/001_create_categories.sql
+psql "$DATABASE_URL" -f database/migrations/002_create_technologies.sql
+psql "$DATABASE_URL" -f database/seeds/seed.sql
+```
+
+O seed executa `TRUNCATE` nas tabelas antes de inserir os dados. Não o execute em um banco com dados que deseja preservar.
+
+Para parar o banco sem remover os dados:
+
+```bash
+docker compose down
+```
+
+## Executar a aplicação
+
+Com o PostgreSQL em execução e o `.env` configurado, inicie API e web em paralelo a partir da raiz:
+
+```bash
 npm run dev
 ```
 
-**2. Iniciando o Frontend (Web):**
-```bash
-cd apps/web
-npm run dev
+Endereços locais:
+
+- Interface: `http://localhost:5173`
+- API: `http://localhost:3333`
+
+Também é possível iniciar os serviços separadamente com `npm run dev:api` e `npm run dev:web`.
+
+## API
+
+| Método | Caminho | Descrição |
+| --- | --- | --- |
+| `GET` | `/api/categories` | Lista as categorias. |
+| `GET` | `/api/technologies` | Lista as tecnologias. |
+| `GET` | `/api/technologies/:id` | Consulta uma tecnologia pelo ID. |
+| `POST` | `/api/scripts/generate` | Gera um script a partir dos IDs em `technologyIds`. |
+
+Exemplo de payload para gerar um script:
+
+```json
+{
+  "technologyIds": ["git", "nodejs", "python"]
+}
 ```
-O Frontend normalmente estará disponível em `http://localhost:5173`. Verifique o console para eventuais logs de acesso.
 
-## 🔮 Futuras Alterações e Melhorias (Roadmap)
+## Testes e qualidade
 
-Aqui estão as funcionalidades e melhorias planejadas para a evolução do projeto:
+Execute os testes do backend:
 
-- [ ] **Orquestração de Scripts na Raiz:** Adicionar o `concurrently` (ou a adoção do **Turborepo**) para permitir inicializar o Backend e o Frontend rodando um único comando `npm run dev` na raiz do projeto.
-- [ ] **Dockerização:** Inclusão de `Dockerfile` e de um `docker-compose.yml` raiz para rodar o PostgreSQL e as aplicações em containers, padronizando o ambiente de desenvolvimento.
-- [ ] **Testes:** Configuração de um ecossistema de testes unitários e de integração (usando ferramentas como Jest ou Vitest).
-- [ ] **Pipelines CI/CD:** Implementação de GitHub Actions para rodar linter, testes e build automaticamente a cada Pull Request.
-- [ ] **Autenticação:** Implementação completa do fluxo de login utilizando JWT e proteção de rotas no cliente React.
-- [ ] **Integração Real do pacote `shared`:** Refinar e exportar tipos TS das requisições e respostas do Express e consumi-los diretamente na aplicação React.
+```bash
+npm run test -w apps/api
+```
 
-## 📄 Licença de Uso
+O teste atual cobre a estrutura básica do script e a inclusão condicional de `snapd`. A aplicação web possui comandos próprios de build e lint:
 
-Este projeto está licenciado sob a licença **ISC**. 
+```bash
+npm run build -w apps/web
+npm run lint -w apps/web
+```
 
-A licença ISC é uma licença de software livre permissiva. Você tem liberdade para utilizar, copiar, modificar e distribuir este software (inclusive para fins comerciais), desde que o aviso de direitos autorais e as permissões sejam mantidos em todas as cópias do projeto.
+## Licença e contato
 
-## 📞 Contato
+Este projeto está licenciado sob a licença ISC.
 
-- **GitHub:** [JM160](https://github.com/JM160)
-- **LinkedIn:** [jm160](https://www.linkedin.com/in/jm160/)
-- **E-mail:** [jmatheus.andrade1507@gmail.com](mailto:jmatheus.andrade1507@gmail.com)
-
----
-
-&copy; 2026 JM160. Todos os direitos reservados.
+- GitHub: [JM160](https://github.com/JM160)
+- LinkedIn: [jm160](https://www.linkedin.com/in/jm160/)
+- E-mail: [jmatheus.andrade1507@gmail.com](mailto:jmatheus.andrade1507@gmail.com)
