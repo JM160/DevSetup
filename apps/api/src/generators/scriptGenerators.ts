@@ -12,7 +12,7 @@ export const scriptGenerator = {
 
         if(requiresSnap) {
             script += "# Instalando a dependência snapd\n";
-            script += "sudo apt-get update && sudp apt-get install -y snapd\n\n";
+            script += "sudo apt-get update && sudo apt-get install -y snapd\n\n";
         }
 
         for(const tech of technologies) {
