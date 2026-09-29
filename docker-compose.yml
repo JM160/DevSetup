@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: devsetup-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-SuaSenha}
+      POSTGRES_DB: devsetup
+    ports:
+      - "5432:5432"
+    volumes:
+      - devsetup_data:/var/lib/postgresql/data
+      - ./database/migrations/001_create_categories.sql:/docker-entrypoint-initdb.d/01-categories.sql
+      - ./database/migrations/002_create_technologies.sql:/docker-entrypoint-initdb.d/02-technologies.sql
+      - ./database/seeds/seed.sql:/docker-entrypoint-initdb.d/03-seed.sql
+
+volumes:
+  devsetup_data:
