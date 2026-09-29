@@ -192,6 +192,12 @@ function App() {
                   <pre className="script-content">
                     <code>{generatedScript}</code>
                   </pre>
+                  <div style={{ padding: '1rem 1.5rem', background: 'rgba(14, 165, 233, 0.1)', borderTop: '1px solid var(--glass-border)', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                    <strong>Como executar:</strong> Abra o terminal na pasta do arquivo baixado e rode o comando:
+                    <code style={{ background: 'rgba(0,0,0,0.3)', padding: '0.2rem 0.4rem', borderRadius: '4px', marginLeft: '0.5rem', color: 'var(--text-primary)' }}>
+                      bash setup.sh
+                    </code>
+                  </div>
                 </div>
               )}
             </div>
